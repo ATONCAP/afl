@@ -67,57 +67,55 @@ export function useAFLToken() {
   });
 
   // Get user's wallet address for AFL tokens
+  // Throws on error - callers should handle exceptions
   const getUserWalletAddress = useCallback(
-    async (ownerAddress: string): Promise<string | null> => {
+    async (ownerAddress: string): Promise<string> => {
       if (!isDeployed || !minterAddress) {
-        return null;
+        throw new Error("AFL Minter contract not deployed");
       }
 
-      try {
-        const client = await getTonClient();
-        const minter = Address.parse(minterAddress);
-        const owner = Address.parse(ownerAddress);
+      const client = await getTonClient();
+      const minter = Address.parse(minterAddress);
+      const owner = Address.parse(ownerAddress);
 
-        const result = await client.runMethod(minter, "get_wallet_address", [
-          { type: "slice", cell: beginCell().storeAddress(owner).endCell() },
-        ]);
+      const result = await client.runMethod(minter, "get_wallet_address", [
+        { type: "slice", cell: beginCell().storeAddress(owner).endCell() },
+      ]);
 
-        return result.stack.readAddress().toString();
-      } catch (error) {
-        console.error("Error getting wallet address:", error);
-        return null;
-      }
+      return result.stack.readAddress().toString();
     },
     [getTonClient, isDeployed, minterAddress]
   );
 
   // Fetch user's AFL balance
+  // Returns null if wallet doesn't exist yet (no tokens received), throws on actual errors
   const {
     data: userBalance,
     isLoading: isLoadingBalance,
     error: balanceError,
   } = useQuery({
     queryKey: ["aflBalance", wallet?.account.address, minterAddress],
-    queryFn: async (): Promise<bigint> => {
-      if (!wallet || !isDeployed) return BigInt(0);
+    queryFn: async (): Promise<bigint | null> => {
+      if (!wallet || !isDeployed) return null;
 
-      try {
-        const walletAddress = await getUserWalletAddress(wallet.account.address);
-        if (!walletAddress) return BigInt(0);
+      const walletAddress = await getUserWalletAddress(wallet.account.address);
+      if (!walletAddress) {
+        // No wallet address means contract query failed
+        throw new Error("Failed to compute AFL wallet address");
+      }
 
-        const client = await getTonClient();
-        const address = Address.parse(walletAddress);
+      const client = await getTonClient();
+      const address = Address.parse(walletAddress);
 
-        // Check if wallet exists
-        const state = await client.getContractState(address);
-        if (state.state !== "active") return BigInt(0);
-
-        const result = await client.runMethod(address, "get_wallet_data");
-        return result.stack.readBigNumber();
-      } catch (error) {
-        console.error("Error fetching balance:", error);
+      // Check if wallet contract exists - not an error if it doesn't
+      const state = await client.getContractState(address);
+      if (state.state !== "active") {
+        // Wallet not deployed yet = 0 balance (not an error)
         return BigInt(0);
       }
+
+      const result = await client.runMethod(address, "get_wallet_data");
+      return result.stack.readBigNumber();
     },
     enabled: !!wallet && isDeployed,
     staleTime: 30000,
@@ -144,10 +142,6 @@ export function useAFLToken() {
       }
 
       const userWalletAddress = await getUserWalletAddress(wallet.account.address);
-      if (!userWalletAddress) {
-        throw new Error("AFL wallet not found. You may not have any AFL tokens.");
-      }
-
       const destination = Address.parse(toAddress);
 
       // Build transfer message
@@ -193,9 +187,6 @@ export function useAFLToken() {
       }
 
       const userWalletAddress = await getUserWalletAddress(wallet.account.address);
-      if (!userWalletAddress) {
-        throw new Error("AFL wallet not found. You may not have any AFL tokens.");
-      }
 
       // Build burn message
       const messageBody = beginCell()
@@ -255,7 +246,8 @@ export function useAFLToken() {
     jettonData,
     isLoadingJetton,
     jettonError,
-    userBalance: userBalance ?? BigInt(0),
+    userBalance: userBalance ?? null,
+    hasBalance: userBalance !== null && userBalance > BigInt(0),
     isLoadingBalance,
     balanceError,
 

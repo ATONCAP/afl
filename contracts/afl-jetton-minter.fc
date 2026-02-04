@@ -145,9 +145,10 @@ slice calculate_wallet_address(cell state_init) inline {
 
         save_data(total_supply - amount, admin_address, content, jetton_wallet_code);
 
-        ;; Send remaining coins back to from_address
+        ;; Send remaining coins back to from_address if valid address provided
         slice response_address = in_msg_body~load_msg_addr();
-        if (~ response_address.slice_empty?()) {
+        ;; Check for valid address (addr_none has only 2 bits for tag 00)
+        if (response_address.slice_bits() > 2) {
             cell msg = begin_cell()
                 .store_uint(0x10, 6)
                 .store_slice(response_address)

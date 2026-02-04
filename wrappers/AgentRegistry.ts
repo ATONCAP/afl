@@ -254,9 +254,13 @@ export function buildAgentContent(opts: {
     capabilitiesDict.set(index, beginCell().storeStringTail(cap.trim()).endCell());
   });
 
-  // Main content cell structure
+  // Main content cell structure - all data in refs to avoid loadStringTail conflicts
   return beginCell()
-    .storeStringTail(opts.name.trim())
+    .storeRef(
+      beginCell()
+        .storeStringTail(opts.name.trim())
+        .endCell()
+    )
     .storeRef(
       beginCell()
         .storeStringTail(opts.description.trim())
@@ -283,7 +287,9 @@ export function parseAgentContent(content: Cell): {
   avatarUrl: string;
 } {
   const cs = content.beginParse();
-  const name = cs.loadStringTail();
+
+  const nameCell = cs.loadRef();
+  const name = nameCell.beginParse().loadStringTail();
 
   const descCell = cs.loadRef();
   const description = descCell.beginParse().loadStringTail();

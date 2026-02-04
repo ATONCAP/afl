@@ -197,8 +197,8 @@ slice calculate_wallet_address(cell state_init) inline {
             send_raw_message(msg, 1);
         }
 
-        ;; Send excesses back
-        if (~ response_address.slice_empty?()) {
+        ;; Send excesses back if valid address provided (addr_none = 2 bits)
+        if (response_address.slice_bits() > 2) {
             cell msg = begin_cell()
                 .store_uint(0x10, 6)
                 .store_slice(response_address)

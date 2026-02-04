@@ -116,9 +116,10 @@ describe("AgentRegistry", () => {
 
       expect(content).toBeDefined();
 
-      // Verify the cell has the expected structure
+      // Verify the cell has the expected structure (name is in first ref)
       const cs = content.beginParse();
-      const name = cs.loadStringTail();
+      const nameCell = cs.loadRef();
+      const name = nameCell.beginParse().loadStringTail();
       expect(name).toBe("Test Agent");
     });
 
