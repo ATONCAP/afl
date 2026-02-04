@@ -1,0 +1,235 @@
+;; Agent Identity SBT Contract (TEP-85 compliant)
+;; Non-transferable token representing an AI agent's on-chain identity
+
+#include "imports/stdlib.fc";
+
+;; Storage layout:
+;; agent_index: uint64
+;; owner_address: MsgAddress
+;; registry_address: MsgAddress
+;; content: Cell (agent metadata - name, description, capabilities, avatar)
+;; revoked: bool
+
+;; Op codes
+const int op::init = 0x0;
+const int op::prove_ownership = 0x5;
+const int op::ownership_proof = 0x6;
+const int op::ownership_proof_bounced = 0x7;
+const int op::request_owner = 0x8;
+const int op::owner_info = 0x9;
+const int op::update_content = 0xA;
+const int op::revoke = 0xB;
+const int op::destroy = 0x1F;
+
+;; Error codes
+const int error::unauthorized = 401;
+const int error::already_revoked = 403;
+const int error::not_initialized = 404;
+
+;; Load contract data
+(int, slice, slice, cell, int) load_data() inline {
+    slice ds = get_data().begin_parse();
+    return (
+        ds~load_uint(64),        ;; agent_index
+        ds~load_msg_addr(),      ;; owner_address
+        ds~load_msg_addr(),      ;; registry_address
+        ds~load_ref(),           ;; content
+        ds~load_uint(1)          ;; revoked
+    );
+}
+
+;; Save contract data
+() save_data(int agent_index, slice owner_address, slice registry_address, cell content, int revoked) impure inline {
+    set_data(begin_cell()
+        .store_uint(agent_index, 64)
+        .store_slice(owner_address)
+        .store_slice(registry_address)
+        .store_ref(content)
+        .store_uint(revoked, 1)
+        .end_cell()
+    );
+}
+
+;; Initialize with content (called during deployment)
+() init_content(cell content) impure inline {
+    (int agent_index, slice owner_address, slice registry_address, cell old_content, int revoked) = load_data();
+
+    ;; Only initialize if content is empty
+    slice old_cs = old_content.begin_parse();
+    if (old_cs.slice_empty?()) {
+        save_data(agent_index, owner_address, registry_address, content, revoked);
+    }
+}
+
+;; Send ownership proof
+() send_ownership_proof(slice dest, int query_id, slice owner_address, cell payload, int forward_amount) impure inline {
+    cell msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(dest)
+        .store_coins(forward_amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(op::ownership_proof, 32)
+        .store_uint(query_id, 64)
+        .store_uint(0, 256)  ;; id (not used for SBT)
+        .store_slice(owner_address)
+        .store_ref(payload)
+        .store_uint(0, 64)  ;; revoked_at (0 = not revoked)
+        .store_ref(begin_cell().end_cell())  ;; content_data (empty)
+        .end_cell();
+
+    send_raw_message(msg, 64);
+}
+
+;; Send owner info
+() send_owner_info(slice dest, int query_id, slice owner_address, cell payload, int forward_amount) impure inline {
+    cell msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(dest)
+        .store_coins(forward_amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_uint(op::owner_info, 32)
+        .store_uint(query_id, 64)
+        .store_uint(0, 256)  ;; id
+        .store_slice(owner_address)
+        .store_ref(payload)
+        .store_uint(0, 64)  ;; revoked_at
+        .store_ref(begin_cell().end_cell())
+        .end_cell();
+
+    send_raw_message(msg, 64);
+}
+
+;; Main entry point
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+
+    if (flags & 1) {  ;; Bounced
+        return ();
+    }
+
+    slice sender_address = cs~load_msg_addr();
+
+    ;; Handle init message (deployed with content as ref)
+    if (in_msg_body.slice_empty?()) {
+        return ();
+    }
+
+    ;; Check if this is an init message (content cell directly)
+    if (in_msg_body.slice_refs() == 1) {
+        ;; Try to load as init content
+        cell content = in_msg_body~load_ref();
+        init_content(content);
+        return ();
+    }
+
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+
+    (int agent_index, slice owner_address, slice registry_address, cell content, int revoked) = load_data();
+
+    ;; Prove ownership (TEP-85)
+    if (op == op::prove_ownership) {
+        slice dest = in_msg_body~load_msg_addr();
+        cell forward_payload = in_msg_body~load_ref();
+        int with_content = in_msg_body~load_uint(1);
+
+        throw_unless(error::unauthorized, equal_slices(sender_address, owner_address));
+        throw_if(error::already_revoked, revoked);
+
+        send_ownership_proof(dest, query_id, owner_address, forward_payload, 0);
+        return ();
+    }
+
+    ;; Request owner (TEP-85)
+    if (op == op::request_owner) {
+        slice dest = in_msg_body~load_msg_addr();
+        cell forward_payload = in_msg_body~load_ref();
+        int with_content = in_msg_body~load_uint(1);
+
+        send_owner_info(dest, query_id, owner_address, forward_payload, 0);
+        return ();
+    }
+
+    ;; Update content (only owner)
+    if (op == op::update_content) {
+        throw_unless(error::unauthorized, equal_slices(sender_address, owner_address));
+        throw_if(error::already_revoked, revoked);
+
+        cell new_content = in_msg_body~load_ref();
+        save_data(agent_index, owner_address, registry_address, new_content, revoked);
+        return ();
+    }
+
+    ;; Revoke (only registry or owner)
+    if (op == op::revoke) {
+        int authorized = equal_slices(sender_address, owner_address) |
+                         equal_slices(sender_address, registry_address);
+        throw_unless(error::unauthorized, authorized);
+        throw_if(error::already_revoked, revoked);
+
+        save_data(agent_index, owner_address, registry_address, content, -1);  ;; -1 = true
+        return ();
+    }
+
+    ;; Destroy (only owner, self-destruct)
+    if (op == op::destroy) {
+        throw_unless(error::unauthorized, equal_slices(sender_address, owner_address));
+
+        cell msg = begin_cell()
+            .store_uint(0x18, 6)
+            .store_slice(owner_address)
+            .store_coins(0)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .end_cell();
+        send_raw_message(msg, 128 + 32);  ;; Send all remaining balance and destroy
+        return ();
+    }
+
+    ;; Unknown op - just accept the message
+    return ();
+}
+
+;; Get methods
+
+;; Get agent data (TEP-85 get_nft_data equivalent)
+(int, int, slice, slice, cell) get_agent_data() method_id {
+    (int agent_index, slice owner_address, slice registry_address, cell content, int revoked) = load_data();
+    return (
+        revoked ? 0 : -1,  ;; init (-1 = true, initialized)
+        agent_index,
+        registry_address,
+        owner_address,
+        content
+    );
+}
+
+;; Get owner address
+slice get_owner() method_id {
+    (_, slice owner_address, _, _, _) = load_data();
+    return owner_address;
+}
+
+;; Get registry address
+slice get_registry() method_id {
+    (_, _, slice registry_address, _, _) = load_data();
+    return registry_address;
+}
+
+;; Get content
+cell get_content() method_id {
+    (_, _, _, cell content, _) = load_data();
+    return content;
+}
+
+;; Check if revoked
+int is_revoked() method_id {
+    (_, _, _, _, int revoked) = load_data();
+    return revoked;
+}
+
+;; Get agent index
+int get_agent_index() method_id {
+    (int agent_index, _, _, _, _) = load_data();
+    return agent_index;
+}

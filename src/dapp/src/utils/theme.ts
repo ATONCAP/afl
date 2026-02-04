@@ -1,4 +1,2 @@
-import { extendTheme, withDefaultColorScheme } from "@chakra-ui/react";
-
-export const sendTheme = extendTheme({}, withDefaultColorScheme({ colorScheme: "blue" }));
-export const getTheme = extendTheme({}, withDefaultColorScheme({ colorScheme: "green" }));
+// Re-export from centralized theme
+export { sendTheme, getTheme, aflTheme, aflColors } from "../theme/aflTheme";

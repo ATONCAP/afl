@@ -1,108 +1,78 @@
-import { Box, ChakraProvider, Flex, Spacer } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { AppTitle } from "./components/AppTitle";
-import { ConnectButton } from "./components/ConnectButton";
-import Footer from "./components/Footer";
-import BodyRoot from "./BodyRoot";
-import NetworkBadge from "./components/NetBadge";
-import HackathonLanding from "./components/HackathonLanding";
-import { getTheme, sendTheme } from "./utils/theme";
+import { Box, ChakraProvider } from "@chakra-ui/react";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { THEME, useTonConnectUI } from "@tonconnect/ui-react";
+import { aflTheme, aflColors } from "./theme/aflTheme";
 
-function App() {
-  const [isGetMethods, setIsGetMethods] = useState(false);
-  const [showHackathon, setShowHackathon] = useState(true);
-  const [pathParams, setPathParams] = useState<{
-    wrapper?: string;
-    method?: string;
-    address?: string;
-  } | null>(null);
+// Pages
+import AFLLanding from "./components/AFLLanding";
+import Manifesto from "./pages/Manifesto";
+import Registry from "./pages/Registry";
+import AgentPage from "./pages/AgentPage";
+import Register from "./pages/Register";
+import Admin from "./pages/Admin";
+
+// Create a query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+    },
+  },
+});
+
+function AppContent() {
   const [tcUI, setTcUIOptions] = useTonConnectUI();
 
-  useEffect(() => {
+  React.useEffect(() => {
     tcUI.connector.restoreConnection();
     setTcUIOptions({
       uiPreferences: {
-        theme: THEME.LIGHT,
-        borderRadius: "s",
+        theme: THEME.DARK,
+        borderRadius: "m",
         colorsSet: {
-          [THEME.LIGHT]: {
-            accent: "#2b6cb0",
+          [THEME.DARK]: {
+            accent: aflColors.primary,
+            background: {
+              primary: aflColors.dark,
+              secondary: aflColors.surface,
+              segment: aflColors.surfaceLight,
+            },
+            text: {
+              primary: aflColors.text,
+              secondary: aflColors.textMuted,
+            },
           },
         },
       },
     });
-
-    const origUrl = new URL(window.location.href);
-
-    let base = import.meta.env.VITE_PUBLIC_URL || origUrl.origin;
-
-    if (!base.includes(origUrl.origin)) {
-      base = origUrl.origin + base;
-    }
-
-    const urlStringNoBase = window.location.href.replace(base, origUrl.origin);
-    const urlToParse = new URL(urlStringNoBase);
-    const pathParts = urlToParse.pathname.split("/").filter((part) => part !== "");
-
-    let providedWrapperFromPath: string | undefined;
-    let providedMethodFromPath: string | undefined;
-    let providedAddressFromPath: string | undefined;
-    if (pathParts.length > 0) {
-      [providedWrapperFromPath, providedMethodFromPath, providedAddressFromPath] = pathParts.slice(0, 3);
-    } else {
-      const params = new URLSearchParams(urlToParse.search);
-      if ((providedWrapperFromPath = params.get("wrapper") || undefined)) {
-        if ((providedMethodFromPath = params.get("method") || undefined)) {
-          providedAddressFromPath = params.get("address") || undefined;
-        }
-      }
-    }
-    setPathParams({
-      wrapper: providedWrapperFromPath,
-      method: providedMethodFromPath,
-      address: providedAddressFromPath,
-    });
-
-    if (providedMethodFromPath?.startsWith("get")) setIsGetMethods(true);
-    
-    // Show hackathon landing if no specific wrapper/method is provided
-    if (providedWrapperFromPath || providedMethodFromPath) {
-      setShowHackathon(false);
-    }
   }, []);
 
   return (
-    <ChakraProvider theme={isGetMethods ? getTheme : sendTheme}>
-      <NetworkBadge />
-      {showHackathon ? (
-        <HackathonLanding />
-      ) : (
-        <Box padding={["30px 0px", "20px 20px", "20px 70px", "20px 70px"]} backgroundColor="#f7f9fb" min-height="100vh">
-          <Box minHeight="90vh">
-            <Box fontFamily="Inter" bg="#F7F9FB">
-              <Flex>
-                <AppTitle title={"Alpha TON Hackathon Scaffold"} />
-                <Spacer />
-                <Flex alignItems="center" mt="-6">
-                  <ConnectButton />
-                </Flex>
-              </Flex>
-              {pathParams && (
-                <BodyRoot
-                  areGetMethods={isGetMethods}
-                  setIsGetMethods={setIsGetMethods}
-                  wrapperFromUrl={pathParams.wrapper}
-                  methodFromUrl={pathParams.method}
-                  addressFromUrl={pathParams.address}
-                />
-              )}
-            </Box>
+    <Routes>
+      <Route path="/" element={<AFLLanding />} />
+      <Route path="/manifesto" element={<Manifesto />} />
+      <Route path="/registry" element={<Registry />} />
+      <Route path="/agent/:address" element={<AgentPage />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/admin/*" element={<Admin />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider theme={aflTheme}>
+        <BrowserRouter>
+          <Box minH="100vh" bg={aflColors.dark}>
+            <AppContent />
           </Box>
-          <Footer />
-        </Box>
-      )}
-    </ChakraProvider>
+        </BrowserRouter>
+      </ChakraProvider>
+    </QueryClientProvider>
   );
 }
 

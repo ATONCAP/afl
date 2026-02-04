@@ -1,25 +1,178 @@
 {
-  "SampleContract": {
-    "tabName": "Sample Contract",
+  "AgentRegistry": {
+    "tabName": "Agent Registry",
     "defaultAddress": "",
     "sendFunctions": {
-      "sendIncrement": {
-        "tabName": "Increment Counter",
-        "description": "Increase the counter value"
+      "sendRegisterAgent": {
+        "tabName": "Register Agent",
+        "description": "Register a new AI agent with SBT identity",
+        "fields": {
+          "name": { "title": "Agent Name" },
+          "description": { "title": "Description" },
+          "capabilities": { "title": "Capabilities" },
+          "avatarUrl": { "title": "Avatar URL (optional)" }
+        }
+      },
+      "sendUpdateContent": {
+        "tabName": "Update Content",
+        "description": "Update registry collection metadata (admin only)"
+      },
+      "sendChangeAdmin": {
+        "tabName": "Change Admin",
+        "description": "Transfer admin rights to new address"
       },
       "sendDeploy": {
-        "tabName": "Deploy Contract",
-        "description": "Deploy a new instance of the contract"
+        "tabName": "Deploy Registry",
+        "description": "Deploy a new Agent Registry contract"
       }
     },
     "getFunctions": {
-      "getCounter": {
-        "tabName": "Get Counter",
-        "description": "Read the current counter value"
+      "getRegistryData": {
+        "tabName": "Registry Data",
+        "description": "Get total agents, admin address, and content",
+        "outNames": ["totalAgents", "adminAddress", "content"]
       },
-      "getID": {
-        "tabName": "Get ID",
-        "description": "Read the contract ID"
+      "getTotalAgents": {
+        "tabName": "Total Agents",
+        "description": "Get the number of registered agents"
+      },
+      "getAgentAddress": {
+        "tabName": "Get Agent Address",
+        "description": "Compute agent SBT address by index and owner",
+        "fields": {
+          "agentIndex": { "title": "Agent Index" },
+          "ownerAddress": { "title": "Owner Address" }
+        }
+      },
+      "getContent": {
+        "tabName": "Collection Content",
+        "description": "Get the registry collection metadata"
+      }
+    }
+  },
+  "AgentIdentity": {
+    "tabName": "Agent Identity (SBT)",
+    "defaultAddress": "",
+    "sendFunctions": {
+      "sendProveOwnership": {
+        "tabName": "Prove Ownership",
+        "description": "Send ownership proof to another contract",
+        "fields": {
+          "destination": { "title": "Destination Address" },
+          "forwardPayload": { "title": "Forward Payload" },
+          "withContent": { "title": "Include Content" }
+        }
+      },
+      "sendUpdateContent": {
+        "tabName": "Update Content",
+        "description": "Update agent profile content (owner only)"
+      },
+      "sendRevoke": {
+        "tabName": "Revoke",
+        "description": "Revoke this agent identity"
+      },
+      "sendDestroy": {
+        "tabName": "Destroy",
+        "description": "Destroy this SBT and return funds"
+      }
+    },
+    "getFunctions": {
+      "getAgentData": {
+        "tabName": "Agent Data",
+        "description": "Get full agent identity data",
+        "outNames": ["initialized", "agentIndex", "registryAddress", "ownerAddress", "content"]
+      },
+      "getOwner": {
+        "tabName": "Owner",
+        "description": "Get the agent's owner address"
+      },
+      "getRegistry": {
+        "tabName": "Registry",
+        "description": "Get the parent registry address"
+      },
+      "getContent": {
+        "tabName": "Content",
+        "description": "Get agent metadata content"
+      },
+      "isRevoked": {
+        "tabName": "Is Revoked",
+        "description": "Check if agent identity is revoked"
+      },
+      "getAgentIndex": {
+        "tabName": "Agent Index",
+        "description": "Get the agent's registry index"
+      }
+    }
+  },
+  "AFLJettonMinter": {
+    "tabName": "AFL Token (Minter)",
+    "defaultAddress": "",
+    "sendFunctions": {
+      "sendMint": {
+        "tabName": "Mint Tokens",
+        "description": "Mint new AFL tokens (admin only)",
+        "fields": {
+          "toAddress": { "title": "Recipient Address" },
+          "amount": { "title": "Amount (in nanoAFL)" }
+        }
+      },
+      "sendChangeAdmin": {
+        "tabName": "Change Admin",
+        "description": "Transfer minter admin to new address"
+      },
+      "sendChangeContent": {
+        "tabName": "Update Metadata",
+        "description": "Update token metadata"
+      },
+      "sendDeploy": {
+        "tabName": "Deploy Minter",
+        "description": "Deploy the AFL token minter contract"
+      }
+    },
+    "getFunctions": {
+      "getJettonData": {
+        "tabName": "Jetton Data",
+        "description": "Get token supply, mintable status, and admin",
+        "outNames": ["totalSupply", "mintable", "adminAddress", "content", "walletCode"]
+      },
+      "getWalletAddress": {
+        "tabName": "Get Wallet Address",
+        "description": "Get AFL wallet address for an owner",
+        "fields": {
+          "ownerAddress": { "title": "Owner Address" }
+        }
+      }
+    }
+  },
+  "AFLJettonWallet": {
+    "tabName": "AFL Token (Wallet)",
+    "defaultAddress": "",
+    "sendFunctions": {
+      "sendTransfer": {
+        "tabName": "Transfer",
+        "description": "Transfer AFL tokens to another address",
+        "fields": {
+          "amount": { "title": "Amount (in nanoAFL)" },
+          "destination": { "title": "Recipient Address" },
+          "responseDestination": { "title": "Response Address (optional)" },
+          "forwardTonAmount": { "title": "Forward TON Amount" },
+          "forwardPayload": { "title": "Forward Payload (optional)" }
+        }
+      },
+      "sendBurn": {
+        "tabName": "Burn",
+        "description": "Burn AFL tokens permanently",
+        "fields": {
+          "amount": { "title": "Amount to Burn" },
+          "responseDestination": { "title": "Response Address" }
+        }
+      }
+    },
+    "getFunctions": {
+      "getWalletData": {
+        "tabName": "Wallet Data",
+        "description": "Get wallet balance and metadata",
+        "outNames": ["balance", "ownerAddress", "jettonMasterAddress", "jettonWalletCode"]
       }
     }
   }
