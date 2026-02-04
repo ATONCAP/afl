@@ -4,6 +4,12 @@ dist/
 yarn-error.log
 vim.session
 
+# Demo output files (generated audio/subtitles)
+demo/output/*.mp3
+demo/output/*.wav
+demo/output/*.srt
+demo/output/*.vtt
+
 # yarn
 .yarn/*
 !.yarn/patches

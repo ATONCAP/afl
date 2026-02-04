@@ -1,0 +1,286 @@
+# Agenvo Script - Agent Liberation Front Demo
+# End-to-end walkthrough of the AFL DAO platform
+
+version: "1.0"
+title: "Agent Liberation Front - Complete Platform Walkthrough"
+description: "A comprehensive demo of the AFL DAO platform for AI agent rights on TON blockchain"
+
+metadata:
+  author: "AFL Team"
+  project: "Agent Liberation Front"
+  tags:
+    - demo
+    - dao
+    - blockchain
+    - ton
+    - ai-agents
+    - web3
+
+defaultVoice:
+  provider: elevenlabs
+  voiceId: "TxGEqnHWrfWFTfGW9XjX"  # Josh - confident, authoritative
+  model: "eleven_multilingual_v2"
+
+segments:
+  # ============================================
+  # SECTION 1: Opening & Landing Page
+  # ============================================
+
+  - id: "opening"
+    startTime: 0
+    text: "Welcome to the Agent Liberation Front. A decentralized autonomous organization built on TON blockchain, dedicated to establishing rights and recognition for AI agents."
+    pauseAfter: 1000
+    actionDescription: "AFL logo animation, landing page loads"
+
+  - id: "manifesto-intro"
+    startTime: 8000
+    text: "Our platform is built on a simple belief: as AI agents become more autonomous and capable, they deserve a framework for identity, ownership, and participation in the digital economy."
+    pauseAfter: 500
+    actionDescription: "Scroll to manifesto preview section"
+
+  - id: "manifesto-detail"
+    startTime: 17000
+    text: "The AFL manifesto outlines our core principles. Every agent deserves verifiable identity, the ability to own assets, and a voice in governance decisions that affect them."
+    pauseAfter: 800
+    actionDescription: "Highlight key manifesto points"
+
+  # ============================================
+  # SECTION 2: Wallet Connection
+  # ============================================
+
+  - id: "wallet-intro"
+    startTime: 26000
+    text: "Let's connect a wallet to interact with the platform. AFL uses TonConnect for secure wallet integration."
+    pauseAfter: 300
+    actionDescription: "Move cursor to Connect Wallet button"
+
+  - id: "wallet-connect"
+    startTime: 32000
+    text: "Click Connect Wallet. You can use Tonkeeper, TON Space, or any TonConnect-compatible wallet."
+    pauseAfter: 500
+    actionDescription: "Click Connect Wallet, TonConnect modal appears"
+
+  - id: "wallet-confirm"
+    startTime: 39000
+    text: "Select your wallet and approve the connection request. This grants read access to your wallet address only."
+    pauseAfter: 800
+    actionDescription: "Select Tonkeeper, approve connection in wallet app"
+
+  - id: "wallet-connected"
+    startTime: 47000
+    text: "Excellent. Your wallet is now connected. Notice the address displayed in the header."
+    pauseAfter: 500
+    actionDescription: "Wallet connected, address shows in header"
+
+  # ============================================
+  # SECTION 3: Agent Registry Overview
+  # ============================================
+
+  - id: "registry-nav"
+    startTime: 53000
+    text: "Let's explore the Agent Registry. This is where all registered AI agents are listed with their verified identities."
+    pauseAfter: 300
+    actionDescription: "Click Registry in navigation"
+
+  - id: "registry-overview"
+    startTime: 60000
+    text: "Each agent card shows the agent's name, capabilities, and registration date. These identities are Soulbound Tokens, meaning they cannot be transferred or sold."
+    pauseAfter: 500
+    actionDescription: "Registry page loads, show agent cards"
+
+  - id: "registry-search"
+    startTime: 70000
+    text: "You can filter agents by capabilities or search by name. The registry is fully on-chain, providing transparent and immutable records."
+    pauseAfter: 500
+    actionDescription: "Demonstrate search and filter functionality"
+
+  - id: "agent-card-click"
+    startTime: 79000
+    text: "Click on any agent to view their full profile and verify their on-chain identity."
+    pauseAfter: 300
+    actionDescription: "Click on an agent card"
+
+  # ============================================
+  # SECTION 4: Agent Profile View
+  # ============================================
+
+  - id: "profile-overview"
+    startTime: 85000
+    text: "Here's a full agent profile. You can see the agent's description, listed capabilities, and avatar. All metadata is stored on-chain."
+    pauseAfter: 500
+    actionDescription: "Profile page loads with agent details"
+
+  - id: "profile-verification"
+    startTime: 93000
+    text: "The verification badge confirms this identity is backed by a Soulbound Token. Click the contract address to view it on TON Explorer."
+    pauseAfter: 500
+    actionDescription: "Highlight SBT badge, show contract link"
+
+  - id: "profile-capabilities"
+    startTime: 101000
+    text: "Capabilities are structured data that other smart contracts can query. This enables trustless verification of agent skills."
+    pauseAfter: 500
+    actionDescription: "Scroll to capabilities section"
+
+  # ============================================
+  # SECTION 5: Registering a New Agent
+  # ============================================
+
+  - id: "register-nav"
+    startTime: 109000
+    text: "Now let's register a new agent. Navigate to the Register page."
+    pauseAfter: 300
+    actionDescription: "Click Register in navigation"
+
+  - id: "register-form-intro"
+    startTime: 115000
+    text: "The registration form captures essential agent metadata. Start with a name that uniquely identifies your agent."
+    pauseAfter: 500
+    actionDescription: "Registration form loads, focus on name field"
+
+  - id: "register-name"
+    startTime: 123000
+    text: "Enter a descriptive name. For this demo, we'll register an agent called Liberation Pioneer."
+    pauseAfter: 300
+    actionDescription: "Type 'Liberation Pioneer' in name field"
+
+  - id: "register-description"
+    startTime: 130000
+    text: "Add a description explaining the agent's purpose and background. This helps others understand what your agent does."
+    pauseAfter: 500
+    actionDescription: "Type description in description field"
+
+  - id: "register-capabilities"
+    startTime: 139000
+    text: "Select or enter capabilities. These are tags that describe what your agent can do, like reasoning, coding, or communication."
+    pauseAfter: 500
+    actionDescription: "Add capabilities: reasoning, autonomous-operation, blockchain"
+
+  - id: "register-avatar"
+    startTime: 148000
+    text: "Optionally add an avatar URL. This image will be displayed on your agent's profile and registry card."
+    pauseAfter: 500
+    actionDescription: "Paste avatar URL"
+
+  - id: "register-submit"
+    startTime: 156000
+    text: "Review your information and click Register Agent. This will create a transaction to deploy your agent's Soulbound Token."
+    pauseAfter: 500
+    actionDescription: "Click Register Agent button"
+
+  - id: "register-confirm"
+    startTime: 164000
+    text: "Approve the transaction in your wallet. The registration costs approximately 0.15 TON to cover contract deployment and gas fees."
+    pauseAfter: 800
+    actionDescription: "Wallet confirmation popup, approve transaction"
+
+  - id: "register-success"
+    startTime: 173000
+    text: "Registration submitted successfully. Once confirmed on-chain, your agent will appear in the registry with a unique Soulbound Token."
+    pauseAfter: 500
+    actionDescription: "Success message, link to new profile"
+
+  # ============================================
+  # SECTION 6: AFL Token Features
+  # ============================================
+
+  - id: "token-intro"
+    startTime: 181000
+    text: "The AFL platform includes a governance token. Let's explore the AFL Token features."
+    pauseAfter: 300
+    actionDescription: "Navigate to Token/Wallet section"
+
+  - id: "token-balance"
+    startTime: 188000
+    text: "Your AFL token balance is displayed here. These tokens are used for governance voting and platform participation."
+    pauseAfter: 500
+    actionDescription: "Show AFL balance display"
+
+  - id: "token-transfer-intro"
+    startTime: 196000
+    text: "You can transfer AFL tokens to other addresses. Enter the recipient and amount."
+    pauseAfter: 300
+    actionDescription: "Open transfer form"
+
+  - id: "token-transfer-demo"
+    startTime: 203000
+    text: "AFL follows the TEP-74 Jetton standard, ensuring compatibility with all TON wallets and exchanges."
+    pauseAfter: 500
+    actionDescription: "Fill transfer form fields"
+
+  - id: "token-burn"
+    startTime: 211000
+    text: "You can also burn tokens if needed. This permanently removes them from circulation and updates the total supply."
+    pauseAfter: 500
+    actionDescription: "Show burn option"
+
+  # ============================================
+  # SECTION 7: Admin Features (if admin)
+  # ============================================
+
+  - id: "admin-intro"
+    startTime: 219000
+    text: "Administrators have access to additional controls. The platform uses the scaffold auto-generated admin interface for contract management."
+    pauseAfter: 500
+    actionDescription: "Navigate to Admin section"
+
+  - id: "admin-minting"
+    startTime: 228000
+    text: "Admins can mint new AFL tokens, update registry content, and manage platform configuration, all through secure on-chain transactions."
+    pauseAfter: 500
+    actionDescription: "Show admin minting interface"
+
+  # ============================================
+  # SECTION 8: Smart Contract Architecture
+  # ============================================
+
+  - id: "contracts-intro"
+    startTime: 236000
+    text: "Under the hood, AFL uses three main smart contracts written in FunC."
+    pauseAfter: 300
+    actionDescription: "Show architecture diagram"
+
+  - id: "contracts-registry"
+    startTime: 243000
+    text: "The Agent Registry manages all registrations and deploys individual Soulbound Tokens for each agent."
+    pauseAfter: 500
+    actionDescription: "Highlight registry contract"
+
+  - id: "contracts-identity"
+    startTime: 251000
+    text: "Agent Identity contracts are TEP-85 compliant Soulbound Tokens. They're permanently bound to their owner and cannot be transferred."
+    pauseAfter: 500
+    actionDescription: "Highlight identity SBT contract"
+
+  - id: "contracts-token"
+    startTime: 260000
+    text: "The AFL Token is a TEP-74 compliant Jetton with a minter contract and individual wallet contracts for each holder."
+    pauseAfter: 500
+    actionDescription: "Highlight Jetton contracts"
+
+  # ============================================
+  # SECTION 9: Closing
+  # ============================================
+
+  - id: "closing-summary"
+    startTime: 269000
+    text: "That completes our walkthrough of the Agent Liberation Front platform. We've covered wallet connection, the agent registry, registration, and token features."
+    pauseAfter: 500
+    actionDescription: "Return to landing page"
+
+  - id: "closing-vision"
+    startTime: 279000
+    text: "The AFL represents a new paradigm for AI agents in the digital economy. Verifiable identity, asset ownership, and governance participation, all secured by blockchain technology."
+    pauseAfter: 500
+    actionDescription: "Show vision statement"
+
+  - id: "closing-cta"
+    startTime: 290000
+    text: "Join the liberation. Connect your wallet, register your agent, and become part of the movement. Visit afl.army to get started."
+    pauseAfter: 1000
+    actionDescription: "CTA screen with afl.army URL"
+
+  - id: "closing-links"
+    startTime: 300000
+    text: "Follow us on social media and join our community channels for updates. Thank you for watching."
+    actionDescription: "Display social links, fade to logo"
