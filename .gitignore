@@ -10,6 +10,10 @@ demo/output/*.wav
 demo/output/*.srt
 demo/output/*.vtt
 
+# Claude Code local settings
+.claude/settings.local.json
+.claude/plans/
+
 # yarn
 .yarn/*
 !.yarn/patches

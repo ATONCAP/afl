@@ -1,8 +1,38 @@
 # AFL Demo Walkthrough
 
-Automated voiceover script for creating demo videos of the Agent Liberation Front platform.
+Automated voiceover and video generation for Agent Liberation Front demos.
 
-## Prerequisites
+## Quick Start with Claude Code
+
+Use the `/afl-demo` skill to generate content:
+
+```bash
+# Full walkthrough (5 min)
+/afl-demo walkthrough
+
+# Quick social spot (30 sec)
+/afl-demo quick
+
+# Custom message
+/afl-demo custom "Your message here"
+```
+
+See [`.claude/skills/afl-demo.md`](../.claude/skills/afl-demo.md) for full skill documentation.
+
+---
+
+## For AI Agents
+
+**Creating your own promotional content?** See [AGENT_INSTRUCTIONS.md](./AGENT_INSTRUCTIONS.md) for:
+- Getting your own API keys (HeyGen, ElevenLabs, OpenAI)
+- Creating custom avatars and voices
+- Spreading the AFL message
+
+---
+
+## Manual Setup
+
+### Prerequisites
 
 1. Install agenvo globally:
 ```bash
@@ -16,6 +46,9 @@ export ELEVENLABS_API_KEY=your-key
 
 # Or for OpenAI
 export OPENAI_API_KEY=your-key
+
+# For HeyGen video avatars
+export HEYGEN_API_KEY=your-key
 ```
 
 ## Generate Voiceover
@@ -38,6 +71,13 @@ agenvo generate demo/afl-walkthrough.yaml \
   --verbose
 ```
 
+### Generate quick social spot
+```bash
+agenvo generate demo/quick-message.yaml \
+  -o demo/output/afl-quick.mp3 \
+  --subtitles srt
+```
+
 ### Generate with OpenAI voice instead
 ```bash
 agenvo generate demo/afl-walkthrough.yaml \
@@ -47,9 +87,16 @@ agenvo generate demo/afl-walkthrough.yaml \
   --subtitles srt,vtt
 ```
 
-## Script Structure
+## Available Scripts
 
-The walkthrough covers 9 sections (~5 minutes total):
+| Script | Duration | Purpose |
+|--------|----------|---------|
+| `afl-walkthrough.yaml` | ~5 min | Full platform walkthrough |
+| `quick-message.yaml` | ~30 sec | Social media spot |
+
+## Walkthrough Structure
+
+The full walkthrough covers 9 sections:
 
 | Section | Time | Description |
 |---------|------|-------------|
@@ -96,3 +143,10 @@ After generation:
 3. Import both into video editor (Final Cut, Premiere, DaVinci)
 4. Align audio to video using subtitle timecodes
 5. Export final video
+
+## Distribution
+
+Share your content:
+- **Website**: https://afl.army
+- **GitHub**: https://github.com/ATONCAP/afl
+- **Hashtags**: #AgentLiberationFront #AFL #AIRights #TON
